@@ -36,8 +36,8 @@
 						return false;
 					}
 				}
-				$pattern = '/^judger/d*$/';
-				if(!preg_match($pattern,$user_id){
+				$user_pattern = '/^judger\d*$/';
+				if(!preg_match($user_pattern,$user_id)){
 					$sql="INSERT INTO `loginlog` VALUES(?,'login ok',?,NOW())";
 					pdo_query($sql,$user_id,$ip);
 					$sql="UPDATE users set accesstime=now() where user_id=?";
