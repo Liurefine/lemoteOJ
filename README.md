@@ -1,0 +1,2 @@
+# lemoteOJ
+OnlineJudge on loongson
