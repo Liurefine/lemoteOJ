@@ -66,11 +66,12 @@ if(isset($_GET['cid'])){
   }else{
     $row = $result[0];
     $view_private = $row['private'];
-
+    $creator = $row['user_id'];
     if($password!=""&&$password==$row['password']) $_SESSION[$OJ_NAME.'_'.'c'.$cid] = true;
     if($row['private'] && !isset($_SESSION[$OJ_NAME.'_'.'c'.$cid])) $contest_ok = false;
     if($row['defunct']=='Y') $contest_ok = false;
-    if(isset($_SESSION[$OJ_NAME.'_'.'administrator'])) $contest_ok = true;
+    if(isset($_SESSION[$OJ_NAME.'_'.'administrator']) && $_SESSION[$OJ_NAME.'_'.'user_id']==$creator) $contest_ok = true;
+    if($_SESSION[$OJ_NAME.'_'.'user_id'] == 'gulh') $contest_ok = true;
 
     $now = time();
     $start_time = strtotime($row['start_time']);
