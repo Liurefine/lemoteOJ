@@ -37,7 +37,7 @@
 		</div> -->
 <div class="jumbotron" style="margin-top:20px;">
     <h1 align="center">Welcome to UPC Online Judge on Loongson!</h1>
-<div id="timer" style="text-align: center; font-size: 24px; font-family: SimSun-ExtB;"><strong>C语言程序设计课程平台（2019-2020学年第一学期）<br></strong></div>
+<div id="timer" style="text-align: center; font-size: 24px; font-family: SimSun-ExtB;"><strong>C/Python语言程序设计课程平台（2019-2020学年第一学期）<br></strong></div>
 
 <!-- <script type="text/javascript">
     var endTime = getNextEndTime();

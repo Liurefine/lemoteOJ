@@ -75,7 +75,22 @@ if(isset($_GET['search'])&&trim($_GET['search'])!=""){
 }else{
      $filter_sql="  `problem_id`>='".strval($pstart)."' AND `problem_id`<'".strval($pend)."' ";
 }
+if (isset($_GET['teacher'])){
+	$teacher = $_GET['teacher'];
+	$sql = "select `rightstr` from `privilege` where `user_id`=?";
+	$res = pdo_query($sql, $teacher);
+	$problemarr = array();
+	$pattern = '/^p\d*$/';
+	foreach($res as $row){
+		if (preg_match($pattern, $row[0])) {
+			$arr = ltrim($row[0],"p");
+			array_push($problemarr,$arr);
+		}
+	}
+	$query_arr = implode(",",$problemarr);
+	$filter_sql = " `problem_id` in ($query_arr)";
 
+}
 if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])){
 	
 	$sql="SELECT `problem_id`,`title`,`source`,`submit`,`accepted` FROM `problem` WHERE $filter_sql ";
@@ -96,6 +111,7 @@ else{
 	) ";      ////	AND c.`defunct` =  'N'  即使私有结束后被隐藏了，它的题目依旧保留，以免泄露
 
 }
+
 $sql.=" ORDER BY `problem_id`";
 
 if(isset($_GET['search'])&&trim($_GET['search'])!=""){

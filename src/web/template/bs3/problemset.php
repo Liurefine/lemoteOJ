@@ -76,49 +76,75 @@
 						</td>
 					</tr>
 				</table>
-				<table id='problemset' width='90%' class='table table-striped'>
-					<thead>
-						<tr class='toprow'>
-							<th width='5'></th>
-							<th width='20' class='hidden-xs'>
-								<?php echo $MSG_PROBLEM_ID?>
-							</th>
-							<th>
-								<?php echo $MSG_TITLE?>
-							</th>
-							<th class='hidden-xs' width='10%'>
-								<?php echo $MSG_SOURCE?>
-							</th>
-							<th style="cursor:hand" width=60>
-								<?php echo $MSG_AC?>
-							</th>
-							<th style="cursor:hand" width=60>
-								<?php echo $MSG_SUBMIT?>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php
-						$cnt = 0;
-						foreach ( $view_problemset as $row ) {
-							if ( $cnt )
-								echo "<tr class='oddrow'>";
-							else
-								echo "<tr class='evenrow'>";
-							$i = 0;
-							foreach ( $row as $table_cell ) {
-								if ( $i == 1 || $i == 3 )echo "<td  class='hidden-xs'>";
-								else echo "<td>";
-								echo "\t" . $table_cell;
-								echo "</td>";
-								$i++;
-							}
-							echo "</tr>";
-							$cnt = 1 - $cnt;
-						}
-						?>
-					</tbody>
-				</table>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <table id='problemset' width='90%' class='table table-striped'>
+                                <thead>
+                                <tr class='toprow'>
+                                    <th width='5'></th>
+                                    <th width='20' class='hidden-xs'>
+                                        <?php echo $MSG_PROBLEM_ID?>
+                                    </th>
+                                    <th>
+                                        <?php echo $MSG_TITLE?>
+                                    </th>
+                                    <th class='hidden-xs' width='10%'>
+                                        <?php echo $MSG_SOURCE?>
+                                    </th>
+                                    <th style="cursor:hand" width=60>
+                                        <?php echo $MSG_AC?>
+                                    </th>
+                                    <th style="cursor:hand" width=60>
+                                        <?php echo $MSG_SUBMIT?>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php
+                                $cnt = 0;
+                                foreach ( $view_problemset as $row ) {
+                                    if ( $cnt )
+                                        echo "<tr class='oddrow'>";
+                                    else
+                                        echo "<tr class='evenrow'>";
+                                    $i = 0;
+                                    foreach ( $row as $table_cell ) {
+                                        if ( $i == 1 || $i == 3 )echo "<td  class='hidden-xs'>";
+                                        else echo "<td>";
+                                        echo "\t" . $table_cell;
+                                        echo "</td>";
+                                        $i++;
+                                    }
+                                    echo "</tr>";
+                                    $cnt = 1 - $cnt;
+                                }
+                                ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-2">
+                            <p>点击下列按钮，可以查看各老师创建的题目</p>
+                            <?php
+                            $sql = "select distinct user_id from privilege where rightstr like 'p%' and defunct='N'";
+                            $res = pdo_query($sql);
+                            $view_teacher = "";
+                            $view_teacher.= "<div style='word-wrap:break-word;'><p>";
+                            foreach ($res as $row){
+                                if(trim($row[0])=="") continue;
+                                $hash_num=hexdec(substr(md5($row[0]),0,7));
+                                $label_theme=$color_theme[$hash_num%count($color_theme)];
+                                if($label_theme=="") $label_theme="default";
+                                $view_teacher.= "<a class='label label-$label_theme' style='display: inline-block;' href='problemset.php?teacher=".urlencode(htmlentities($row[0],ENT_QUOTES,'UTF-8'))."'>".$row[0]."</a>&nbsp;";
+                            }
+                            $view_teacher.= "</p></div>";
+                            echo $view_teacher;
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                    <div class="row">
+
 			</center>
 		</div>
 
