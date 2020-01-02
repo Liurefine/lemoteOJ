@@ -5,7 +5,7 @@ ini_set("display_errors","Off");
 ?>
 <?php require_once("./include/db_info.inc.php");
 global $mark_base,$mark_per_problem,$mark_per_punish;
- $mark_start=60;
+ $mark_start=40;
  $mark_end=100;
  $mark_sigma=5;
 if(isset($OJ_LANG)){
@@ -21,18 +21,27 @@ class TM{
 	var $user_id;
     var $nick;
     var $mark=0;
+    var $p_pass_rate;
 	function TM(){
 		$this->solved=0;
 		$this->time=0;
 		$this->p_wa_num=array(0);
 		$this->p_ac_sec=array(0);
+		$this->p_pass_rate=array(0);
 	}
-	function Add($pid,$sec,$res,$mark_base,$mark_per_problem,$mark_per_punish){
+	function Add($pid,$sec,$res,$mark_base,$mark_per_problem,$mark_per_punish,$passrate){
 		global $OJ_CE_PENALTY;
 //		echo "Add $pid $sec $res<br>";
 	
 		if (isset($this->p_ac_sec[$pid])&&$this->p_ac_sec[$pid]>0)
 			return;
+		if(isset($this->p_pass_rate[$pid])){
+			if($passrate>$this->p_pass_rate[$pid]){
+				$this->p_pass_rate[$pid]=$passrate;
+			}
+		}else{
+			$this->p_pass_rate[$pid]=$passrate;
+		}
 		if ($res!=4){
 			if(isset($OJ_CE_PENALTY)&&!$OJ_CE_PENALTY&&$res==11) return;  // ACM WF punish no ce 
 			if(isset($this->p_wa_num[$pid])){
@@ -171,7 +180,7 @@ if($pid_cnt==1) {
 $mark_per_punish=$mark_per_problem/5;
 
 	$sql="select
-        user_id,nick,solution.result,solution.num,solution.in_date
+        user_id,nick,solution.result,solution.num,solution.in_date,pass_rate
                         from solution where solution.contest_id=? and num>=0 and problem_id>0
         ORDER BY user_id,solution_id";
 
@@ -192,9 +201,9 @@ $U=array();
 	}
 
         if( time()<$end_time+$OJ_RANK_LOCK_DELAY && $lock<strtotime($row['in_date']) && !isset($_SESSION[$OJ_NAME.'_'.'administrator']) )
-		  $U[$user_cnt]->Add($row['num'],strtotime($row['in_date'])-$start_time,0,$mark_base,$mark_per_problem,$mark_per_punish);
+		  $U[$user_cnt]->Add($row['num'],strtotime($row['in_date'])-$start_time,0,$mark_base,$mark_per_problem,$mark_per_punish,$row['pass_rate']);
         else
-		  $U[$user_cnt]->Add($row['num'],strtotime($row['in_date'])-$start_time,intval($row['result']),$mark_base,$mark_per_problem,$mark_per_punish);
+		  $U[$user_cnt]->Add($row['num'],strtotime($row['in_date'])-$start_time,intval($row['result']),$mark_base,$mark_per_problem,$mark_per_punish,$row['pass_rate']);
 }
 
 usort($U,"s_cmp");
@@ -202,9 +211,10 @@ $rank=1;
 //echo "<style> td{font-size:14} </style>";
 //echo "<title>Contest RankList -- $title</title>";
 echo "<center><h3>Contest RankList -- $title</h3></center>";
-echo "<table border=1><tr><td>Rank<td>User<td>Nick<td>Solved<td>Mark";
+echo "<p style='color: red'>ABCD...列表示各题目该学生提交代码测试用例通过的比率</p>";
+echo "<table border=1><tr><td>排名<td>学号<td>姓名<td>正确<td>分数";
 for ($i=0;$i<$pid_cnt;$i++)
-	echo "<td>$PID[$i]";
+	echo "<td>$PID[$i]（%）";
 echo "</tr>";
 getMark($U,$mark_start,$mark_end,$mark_sigma);
 
@@ -230,16 +240,28 @@ for ($i=0;$i<$user_cnt;$i++){
 	echo "<td>$usolved</td>";
 	echo "<td>";
         if($usolved==0) $U[$i]->mark=0;	
-	
 	echo $U[$i]->mark>0?intval($U[$i]->mark):0;
+//	$score = 0;
+//	for ($j=0; $j <$pid_cnt; $j++) { 
+//		if(isset($U[$i])){
+//			if (isset($U[$i]->p_ac_sec[$j])&&$U[$i]->p_ac_sec[$j]>0)
+//				$score += $U[$i]->p_pass_rate[$j]*100;
+//			else if(isset($U[$i]->p_wa_num[$j])&&$U[$i]->p_wa_num[$j]>0)
+//				$score += $U[$i]->p_pass_rate[$j]*100;
+//			else $score += 0;
+//		}
+//	}
+//	$score = $score/$pid_cnt;
+//	echo intval($score);
 	echo "</td>";
 	for ($j=0;$j<$pid_cnt;$j++){
 		echo "<td>";
 		if(isset($U[$i])){
 			if (isset($U[$i]->p_ac_sec[$j])&&$U[$i]->p_ac_sec[$j]>0)
-				echo sec2str($U[$i]->p_ac_sec[$j]);
-			if (isset($U[$i]->p_wa_num[$j])&&$U[$i]->p_wa_num[$j]>0) 
-				echo "(-".$U[$i]->p_wa_num[$j].")";
+				echo $U[$i]->p_pass_rate[$j]*100;
+			else if(isset($U[$i]->p_wa_num[$j])&&$U[$i]->p_wa_num[$j]>0)
+				echo $U[$i]->p_pass_rate[$j]*100;
+			else echo 0;
 		}
 		echo "</td>";
 	}
